@@ -16,7 +16,6 @@ steps:
     artifact_paths:
       - "hello/hello"
 
-
 #block step that prompts user to enter a name       
   - block: "Enter Name"
     prompt: "Please enter your name"
@@ -25,7 +24,7 @@ steps:
       - text: "Your Name"
         key: "hello-name"
     label: "block-and-prompt"          
-                   
+  #the wait step waits for previous steps to complete before running steps after it                 
   - wait: ~        
  #download app as artifact, update permissions and run the app        
   - label: "search for, download artifacts and run"
