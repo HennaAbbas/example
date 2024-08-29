@@ -1,0 +1,51 @@
+agents:
+  queue: "default-queue"
+  
+steps:
+# a step that simply echo's "hello world!"
+  - label: "echo hello world!"
+    command: echo "hello world!"
+
+#build go app and upload it as an artifact
+  - label: "cd into hello, build app & save artifacts"
+    command:
+     - cd hello && go build
+    plugins:
+      - docker#v5.11.0:
+          image: "golang:1.18.0"
+    artifact_paths:
+      - "hello/hello"
+
+
+#block step that prompts user to enter a name       
+  - block: "Enter Name"
+    prompt: "Please enter your name"
+    branches: "main"
+    fields:
+      - text: "Your Name"
+        key: "hello-name"
+    label: "block-and-prompt"          
+                   
+  - wait: ~        
+ #download app as artifact, update permissions and run the app        
+  - label: "search for, download artifacts and run"
+    command:
+      # - buildkite-agent artifact search hello
+      - mkdir builds
+      - buildkite-agent artifact download 'hello/hello' ./builds
+      - chmod +x ./builds/hello/hello
+      - ./builds/hello/hello $(buildkite-agent meta-data get hello-name)
+
+#install gotestsumm, run test and upload to test suite
+  - label: "🔨 Test"
+    command: 
+      - go install gotest.tools/gotestsum@latest
+      - cd hello
+      - gotestsum --junitfile junit.xml ./...      
+    plugins:
+      - docker#v5.11.0:
+          image: "golang:1.18.0"
+      - test-collector#v1.10.1:
+          files: "hello/junit.xml"
+          format: "junit"      
+
