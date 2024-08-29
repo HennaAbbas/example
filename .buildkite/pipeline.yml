@@ -36,7 +36,7 @@ steps:
       - chmod +x ./builds/hello/hello
       - ./builds/hello/hello $(buildkite-agent meta-data get hello-name)
 
-#install gotestsumm, run test and upload to test suite
+#install gotestsum, run test and upload to test suite
   - label: "🔨 Test"
     command: 
       - go install gotest.tools/gotestsum@latest
